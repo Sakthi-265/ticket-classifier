@@ -10,7 +10,12 @@ import spacy
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
-# ---------- Load artifacts once (cold start only) ----------
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+}
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 artifacts = joblib.load(os.path.join(BASE_DIR, "ticket_model.joblib"))
 count_vect = artifacts["count_vect"]
@@ -24,7 +29,6 @@ MAX_LEN = 3000
 MIN_LEN = 10
 
 
-# ---------- Preprocessing (must mirror the notebook exactly) ----------
 def clean_text(text: str) -> str:
     text = text.lower()
     text = re.sub("/[.*/]", "", text).strip()
@@ -39,8 +43,7 @@ def lemmatize(text: str) -> str:
 
 
 def preprocess(text: str) -> str:
-    lemma = lemmatize(clean_text(text))
-    return lemma.replace("xxxx", "")
+    return lemmatize(clean_text(text)).replace("xxxx", "")
 
 
 def json_response(body: dict, status: int = 200) -> func.HttpResponse:
@@ -48,12 +51,15 @@ def json_response(body: dict, status: int = 200) -> func.HttpResponse:
         json.dumps(body),
         status_code=status,
         mimetype="application/json",
+        headers=CORS_HEADERS,
     )
 
 
-# ---------- Routes ----------
-@app.route(route="classify", methods=["POST"])
+@app.route(route="classify", methods=["POST", "OPTIONS"])
 def classify(req: func.HttpRequest) -> func.HttpResponse:
+    if req.method == "OPTIONS":
+        return func.HttpResponse(status_code=204, headers=CORS_HEADERS)
+
     try:
         payload = req.get_json()
     except ValueError:
@@ -66,8 +72,7 @@ def classify(req: func.HttpRequest) -> func.HttpResponse:
         return json_response({"error": f"Text must be at most {MAX_LEN} characters."}, 400)
 
     try:
-        processed = preprocess(text)
-        features = tfidf_transformer.transform(count_vect.transform([processed]))
+        features = tfidf_transformer.transform(count_vect.transform([preprocess(text)]))
         probs = model.predict_proba(features)[0]
         idx = int(probs.argmax())
         return json_response(
@@ -81,6 +86,8 @@ def classify(req: func.HttpRequest) -> func.HttpResponse:
         return json_response({"error": "Internal error while classifying."}, 500)
 
 
-@app.route(route="health", methods=["GET"])
+@app.route(route="health", methods=["GET", "OPTIONS"])
 def health(req: func.HttpRequest) -> func.HttpResponse:
+    if req.method == "OPTIONS":
+        return func.HttpResponse(status_code=204, headers=CORS_HEADERS)
     return json_response({"status": "ok"})
