@@ -1,7 +1,7 @@
 // ---------- Config ----------
 // On Azure Static Web Apps, "/api/*" is automatically routed to your linked Azure Functions.
 // For local testing against a different backend, change this to e.g. "http://localhost:7071/api/classify".
-   const API_URL = "https://ticket-classifier-api-sakthi-b2g6e5gdgycucqdu.centralindia-01.azurewebsites.net/api/classify";
+const API_URL = "https://ticket-classifier-api-sakthi-b2g6e5gdgycucqdu.centralindia-01.azurewebsites.net/api/classify";
 const MIN_LENGTH = 10;
 
 // ---------- Elements ----------
@@ -96,7 +96,7 @@ form.addEventListener("submit", async (e) => {
   try {
     const response = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "text/plain" },
       body: JSON.stringify({ text }),
     });
 
