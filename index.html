@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket Classifier</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Complaint Ticket Classifier</h1>
+      <p class="subtitle">Describe your issue and we'll route it to the right category.</p>
+    </header>
+
+    <section class="card">
+      <form id="ticket-form" novalidate>
+        <label for="complaint">Your complaint</label>
+        <textarea
+          id="complaint"
+          rows="7"
+          maxlength="3000"
+          placeholder="e.g. My mortgage lender is charging me incorrect monthly payments..."
+          required
+        ></textarea>
+        <div class="meta">
+          <span id="char-count">0 / 3000</span>
+          <span id="error" class="error" role="alert"></span>
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="submit-btn">
+            <span class="btn-text">Classify Ticket</span>
+            <span class="spinner" hidden></span>
+          </button>
+          <button type="button" id="clear-btn" class="secondary">Clear</button>
+        </div>
+      </form>
+
+      <div class="examples">
+        <span>Try an example:</span>
+        <button type="button" class="chip" data-text="I was charged an overdraft fee even though I had enough funds in my checking account.">Bank account</button>
+        <button type="button" class="chip" data-text="There is an unauthorized charge on my credit card and the merchant refuses to refund me.">Card dispute</button>
+        <button type="button" class="chip" data-text="My mortgage lender is charging me incorrect monthly mortgage payments and ignoring my modification request.">Mortgage</button>
+      </div>
+    </section>
+
+    <section id="result" class="card result" hidden>
+      <h2>Predicted Category</h2>
+      <div id="result-badge" class="badge"></div>
+      <div id="confidence-wrap" hidden>
+        <div class="confidence-label">Confidence: <strong id="confidence-text"></strong></div>
+        <div class="bar"><div id="confidence-bar"></div></div>
+      </div>
+    </section>
+
+    <footer>
+      <small>Powered by a Logistic Regression + TF-IDF model</small>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
